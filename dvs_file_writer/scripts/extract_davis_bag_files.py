@@ -12,7 +12,7 @@ import os
 try:
     import OpenEXR, Imath
     import numpy as np
-except ImportError, e:
+except ImportError:
     print("To extract depth image of simulated scenes, please install OpenEXR and Imath")
     pass
 
@@ -88,7 +88,7 @@ with rosbag.Bag(args.bag, 'r') as bag:
                 else:
                     if stamp < reset_time:
                         reset_time = stamp
-    print "Reset time: " + timestamp_str(reset_time)
+    print("Reset time: " + timestamp_str(reset_time))
 
     for topic, msg, t in bag.read_messages():
         # Images
@@ -96,8 +96,8 @@ with rosbag.Bag(args.bag, 'r') as bag:
             try:
                 image_type = msg.encoding
                 cv_image = bridge.imgmsg_to_cv2(msg, image_type)
-            except CvBridgeError, e:
-                print e
+            except CvBridgeError:
+                print("cvbridgeError")
 
             images_file.write(timestamp_str(msg.header.stamp - reset_time) + " ")
             images_file.write(get_filename(image_index) + "\n")
@@ -169,8 +169,8 @@ with rosbag.Bag(args.bag, 'r') as bag:
         elif topic == args.depthmap_topic:
             try:
                 cv_depth = bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough').astype(np.float32)
-            except CvBridgeError, e:
-                print e
+            except CvBridgeError:
+                print("cvbridgeError")
 
             depthmaps_file.write(timestamp_str(msg.header.stamp - reset_time) + " ")
             depthmaps_file.write(get_depth_filename(depthmap_index) + "\n")
@@ -185,12 +185,12 @@ with rosbag.Bag(args.bag, 'r') as bag:
             depthmap_index = depthmap_index + 1
 
 # statistics (remove missing groundtruth or IMU file if not available)
-print "All data extracted!"
-print "Events:       " + str(event_sum)
-print "Images:       " + str(image_index)
-print "Depth maps:   " + str(depthmap_index)
-print "IMU:          " + str(imu_msg_sum)
-print "Ground truth: " + str(groundtruth_msg_sum)
+print("All data extracted!")
+print("Events:       " + str(event_sum))
+print("Images:       " + str(image_index))
+print("Depth maps:   " + str(depthmap_index))
+print("IMU:          " + str(imu_msg_sum))
+print("Ground truth: " + str(groundtruth_msg_sum))
 
 # close all files
 events_file.close()
@@ -202,13 +202,13 @@ groundtruth_file.close()
 # clean up
 if imu_msg_sum == 0:
     os.remove("imu.txt")
-    print "Removed IMU file since there were no messages."
+    print("Removed IMU file since there were no messages.")
 
 if groundtruth_msg_sum == 0:
     os.remove("groundtruth.txt")
-    print "Removed ground truth file since there were no messages."
+    print("Removed ground truth file since there were no messages.")
     
 if depthmap_index == 0:
     os.remove("depthmaps.txt")
     os.removedirs("depthmaps")
-    print "Removed depthmaps file since there were no messages."
+    print("Removed depthmaps file since there were no messages.")
